@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.ejb.EJB;
 import java.util.List;
 
 @Service
@@ -21,21 +22,22 @@ public class SondaServiceImpl implements SondaService{
     @Autowired
     private RegiaoRepository regiaoRepository;
 
-    @Autowired
-    private Sonda sonda;
+//    @EJB
+//    private Sonda sonda;
 
     @Override
     public Sonda saveSonda(Sonda sonda) {
         return sondaRepository.save(sonda);
     }
 
+//    @Override
+//    public ResponseBody pousaSonda(PousoDTO pousoDTO) {
+//        //verificar na tabela planeta se a regiao é diferente de nul
+//        // verificar se a posição está entre as dimensões definidas no planeta
+//
+//        return pousaSonda(pousoDTO);
+//    }
     @Override
-    public ResponseBody pousaSonda(PousoDTO pousoDTO) {
-        //verificar na tabela planeta se a regiao é diferente de nul
-        // verificar se a posição está entre as dimensões definidas no planeta
-
-        return pousaSonda(pousoDTO);
-    }
     public Sonda movimentaSonda(ComandoDTO comandoDTO){
         // consulta no banco todos os registros em planeta, na coluna regiao, que são diferentes de null.
         // compara movimento por movimento com os registros retornados da consulta.
@@ -43,13 +45,14 @@ public class SondaServiceImpl implements SondaService{
 
         /* Método que encontra todas as regiões ocupadas do planeta que a sonda irá se movimentar*/
         List<Regiao> regioes =  regiaoRepository.findByNomePlaneta(comandoDTO.getNomePlaneta());
+        Sonda sonda = new Sonda();
         sonda = sondaRepository.findByName(comandoDTO.getNomePlaneta());
 
         if(regioes.isEmpty()){
             char[] chars = comandoDTO.getComando().toCharArray();
             int len = chars.length;
             for (char ch : chars) {
-                movimenta(ch);
+                movimenta(ch, sonda);
                 //Aqui será feito a chamada do método que calcula para onde a sonda vai andar até encontrar a posição final
                 // depois de calculado,insere no banco na coluna regiao da tabela Planete
             }
@@ -83,20 +86,20 @@ public class SondaServiceImpl implements SondaService{
     }
 
 
-    public void movimenta(char ch){
+    public void movimenta(char ch, Sonda sonda){
         switch (ch) {
             case 'L':
-                setDirecaoLeft();
+                setDirecaoLeft(sonda);
                 break;
             case 'R':
-                setDirecaoRight();
+                setDirecaoRight(sonda);
                 break;
             case 'M':
-                setPosicao();
+                setPosicao(sonda);
         }
     }
 
-    public void setDirecaoLeft(){
+    public void setDirecaoLeft(Sonda sonda){
         switch (sonda.getDirecao()){
             case 'N':
                 sonda.setDirecao('W');
@@ -114,7 +117,7 @@ public class SondaServiceImpl implements SondaService{
         }
     }
 
-    public void setDirecaoRight(){
+    public void setDirecaoRight(Sonda sonda){
         switch (sonda.getDirecao()){
             case 'N':
                 sonda.setDirecao('E');
@@ -131,7 +134,7 @@ public class SondaServiceImpl implements SondaService{
             default: throw new RuntimeException("Direção inválida");
         }
     }
-    public void setPosicao(){
+    public void setPosicao(Sonda sonda){
         switch (sonda.getDirecao()){
             case 'N':
                 sonda.setPosicaoY(sonda.getPosicaoY() +1 );
