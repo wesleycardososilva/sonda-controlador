@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 public interface PlanetaRepository extends JpaRepository<Planeta, Long> {
 
     Planeta save(Planeta planeta);
+
+    Planeta findByNome(String nome);
 }

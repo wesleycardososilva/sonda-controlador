@@ -15,4 +15,14 @@ public class PlanetaServiceImpl implements PlanetaService{
 
         return planetaRepository.save(planeta);
     }
+
+    @Override
+    public Planeta findByNome(String nome) {
+        return planetaRepository.findByNome(nome);
+    }
+
+    @Override
+    public void saveOrUpdate(Planeta planeta, Long id) {
+        planetaRepository.save(planeta);
+    }
 }

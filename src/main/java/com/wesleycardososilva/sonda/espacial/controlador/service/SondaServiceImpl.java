@@ -4,14 +4,14 @@ import com.wesleycardososilva.sonda.espacial.controlador.dto.ComandoDTO;
 import com.wesleycardososilva.sonda.espacial.controlador.dto.PousoDTO;
 import com.wesleycardososilva.sonda.espacial.controlador.entity.Regiao;
 import com.wesleycardososilva.sonda.espacial.controlador.entity.Sonda;
+import com.wesleycardososilva.sonda.espacial.controlador.repository.PlanetaRepository;
 import com.wesleycardososilva.sonda.espacial.controlador.repository.RegiaoRepository;
 import com.wesleycardososilva.sonda.espacial.controlador.repository.SondaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.ejb.EJB;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SondaServiceImpl implements SondaService{
@@ -22,47 +22,65 @@ public class SondaServiceImpl implements SondaService{
     @Autowired
     private RegiaoRepository regiaoRepository;
 
-//    @EJB
-//    private Sonda sonda;
+    @Autowired
+    PlanetaRepository planetaRepository;
 
     @Override
     public Sonda saveSonda(Sonda sonda) {
         return sondaRepository.save(sonda);
     }
 
-//    @Override
-//    public ResponseBody pousaSonda(PousoDTO pousoDTO) {
-//        //verificar na tabela planeta se a regiao é diferente de nul
-//        // verificar se a posição está entre as dimensões definidas no planeta
-//
-//        return pousaSonda(pousoDTO);
-//    }
     @Override
-    public Sonda movimentaSonda(ComandoDTO comandoDTO){
-        // consulta no banco todos os registros em planeta, na coluna regiao, que são diferentes de null.
-        // compara movimento por movimento com os registros retornados da consulta.
-        // se a consulta não retornar resultado algum, calcula onde a sonda ficará e salva a posição em planeta.
+    public Sonda pousaSonda(PousoDTO pousoDTO) {
+        List<Regiao> regioes =  regiaoRepository.findByNomePlaneta(pousoDTO.getNomePlaneta());
+        Optional<Regiao> regiao =  regioes.stream().filter(o -> o.getNomePlaneta().equals(pousoDTO.getNomePlaneta())).findFirst();
 
-        /* Método que encontra todas as regiões ocupadas do planeta que a sonda irá se movimentar*/
-        List<Regiao> regioes =  regiaoRepository.findByNomePlaneta(comandoDTO.getNomePlaneta());
-        Sonda sonda = new Sonda();
-        sonda = sondaRepository.findByName(comandoDTO.getNomePlaneta());
-
-        if(regioes.isEmpty()){
-            char[] chars = comandoDTO.getComando().toCharArray();
-            int len = chars.length;
-            for (char ch : chars) {
-                movimenta(ch, sonda);
-                //Aqui será feito a chamada do método que calcula para onde a sonda vai andar até encontrar a posição final
-                // depois de calculado,insere no banco na coluna regiao da tabela Planete
-            }
-        }else{
-            //calcula quadrante por quadrante que será percorrido
-            // caso tenha algum lugar que está ocupado, a sonda não se movimenta
-            throw new RuntimeException("Comando nao pode ser executado.");
+        if(!isPresent(regioes,pousoDTO.getRegiaoPousoX(), pousoDTO.getRegiaoPousoX())){
+            Sonda sonda = new Sonda();
+            sonda.setPosicaoPousoX(pousoDTO.getRegiaoPousoX());
+            sonda.setPosicaoPousoY(pousoDTO.getRegiaoPousoY());
+            sonda.setDirecao(pousoDTO.getDirecao());
+            sonda.setName(pousoDTO.getNomeSonda());
+            Regiao quadrante = new Regiao();
+            quadrante.setNomePlaneta(pousoDTO.getNomePlaneta());
+            quadrante.setPosicaoX(pousoDTO.getRegiaoPousoX());
+            quadrante.setPosicaoY(pousoDTO.getRegiaoPousoY());
+            regiaoRepository.save(quadrante);
+            return sondaRepository.save(sonda);
         }
 
+        return pousaSonda(pousoDTO);
+    }
+    @Override
+    public Sonda movimentaSonda(ComandoDTO comandoDTO){
+
+
+        List<Regiao> regioes =  regiaoRepository.findByNomePlaneta(comandoDTO.getNomePlaneta());
+        Optional<Regiao> regiao =  regioes.stream().filter(o -> o.getNomePlaneta().equals(comandoDTO.getNomePlaneta())).findFirst();
+
+        Sonda sonda = new Sonda();
+        sonda = sondaRepository.findByName(comandoDTO.getNomeSonda());
+        sonda.setPosicaoX(sonda.getPosicaoPousoX());
+        sonda.setPosicaoY(sonda.getPosicaoPousoY());
+
+        sonda = calculaMovimento(sonda, comandoDTO);
+        if(!dentroDoPlaneta(sonda)){
+            sonda.setPosicaoX(sonda.getPosicaoPousoX());
+            sonda.setPosicaoY(sonda.getPosicaoPousoY());
+            return null;
+        }
+
+        if(!isPresent(regioes,sonda.getPosicaoX(), sonda.getPosicaoY())){
+        sonda.setPosicaoPousoX(sonda.getPosicaoX());
+        sonda.setPosicaoPousoY(sonda.getPosicaoY());
+        Regiao quadrante = new Regiao();
+        quadrante.setNomePlaneta(comandoDTO.getNomePlaneta());
+        quadrante.setPosicaoX(sonda.getPosicaoX());
+        quadrante.setPosicaoY(sonda.getPosicaoY());
+        regiaoRepository.save(quadrante);
         return sondaRepository.save(sonda);
+        }
+        return null;
     }
 
     @Override
@@ -74,15 +92,23 @@ public class SondaServiceImpl implements SondaService{
     public List<Regiao> findByPlaneta(String nomePlaneta) {
         return null;
     }
-    public boolean isPresent(List<Regiao> regioes, int quadrante){
+
+    public boolean isPresent(List<Regiao> regioes, int coordenadaX, int coordenadaY){
 
         Regiao elemento = regioes.stream()
-                .filter(regiao ->quadrante == (regiao.getPosicao()))
+                .filter(regiao ->(coordenadaX == regiao.getPosicaoX() && coordenadaY == (regiao.getPosicaoY())))
                 .findFirst()
                 .orElse(null);
         if(elemento !=null){
             return true;
         }else return false;
+    }
+    public boolean dentroDoPlaneta(Sonda sonda){
+        if(sonda.getPosicaoX() > 5 && sonda.getPosicaoY() > 5){
+            return false;
+        } else if (sonda.getPosicaoX() < 0 && sonda.getPosicaoY() < 0) {
+            return false;
+        }else return true;
     }
 
 
@@ -150,6 +176,14 @@ public class SondaServiceImpl implements SondaService{
                 break;
             default: throw new RuntimeException("Movimento inválida");
         }
+    }
+    public Sonda calculaMovimento(Sonda sonda, ComandoDTO comandoDTO){
+        char[] chars = comandoDTO.getComando().toCharArray();
+        int len = chars.length;
+        for (char ch : chars) {
+            movimenta(ch, sonda);
+        }
+        return sonda;
     }
 
 }

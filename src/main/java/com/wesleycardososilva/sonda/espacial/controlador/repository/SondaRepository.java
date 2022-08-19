@@ -14,10 +14,11 @@ import java.util.List;
 public interface SondaRepository extends JpaRepository<Sonda, Long> {
 
 //    public ResponseBody pousaSonda(PousoDTO pousoDTO);
-    public Sonda findByName(String name);
+//    public Sonda findByName(String name);
 
 //    Sonda update(Sonda sonda, Long id);
 
     Sonda save(Sonda sonda);
 //    Sonda save(Sonda sonda, Long sondaId);
+    public Sonda findByName(String nome);
 }

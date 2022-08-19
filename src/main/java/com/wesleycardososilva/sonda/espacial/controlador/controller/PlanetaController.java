@@ -16,9 +16,9 @@ public class PlanetaController {
     @Autowired
     private PlanetaService planetaService;
 
-    @PostMapping("/planeta")
+    @PostMapping("/salvar")
     public Planeta savePlaneta(@RequestBody Planeta planeta) {
 
-        return savePlaneta(planeta);
+        return planetaService.savePlaneta(planeta);
     }
 }

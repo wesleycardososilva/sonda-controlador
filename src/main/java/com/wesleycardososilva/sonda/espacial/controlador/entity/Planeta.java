@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.persistence.CascadeType;
 import java.util.List;
 
 @Entity
@@ -30,8 +31,8 @@ public class Planeta {
     private String nome;
     private int dimensaoX;
     private int dimensaoY;
-    private int posicaoPouso;
-    private int posicaoFinal;
+//    private int posicaoPouso;
+//    private int posicaoFinal;
 
     @OneToMany
     @JoinColumn(
@@ -40,10 +41,12 @@ public class Planeta {
     )
     private List<Sonda> sondas;
     @OneToMany(
-            cascade = CascadeType.ALL
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY
+
     )
     @JoinColumn(
-            name = "planeta_ID",
+            name = "planeta_id",
             referencedColumnName = "planetaID"
     )
     private List<Regiao> regioes;

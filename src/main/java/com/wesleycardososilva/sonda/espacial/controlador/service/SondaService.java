@@ -14,10 +14,14 @@ import java.util.List;
 public interface SondaService {
 
    public Sonda saveSonda(Sonda sonda);
-//   public ResponseBody pousaSonda(PousoDTO pousoDTO);
+
+    Sonda pousaSonda(PousoDTO pousoDTO);
+
+    //   public ResponseBody pousaSonda(PousoDTO pousoDTO);
   public Sonda movimentaSonda(ComandoDTO comandoDTO);
 
   public Sonda findByName(String name);
   public List<Regiao> findByPlaneta(String nomePlaneta);
+//    public Sonda fetchSondaByName(String name);
 
 }

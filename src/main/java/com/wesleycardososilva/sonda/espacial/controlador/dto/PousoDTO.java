@@ -11,7 +11,9 @@ import lombok.Setter;
 @Setter
 public class PousoDTO {
 
-    private int regiaoPouso;
+    private int regiaoPousoX;
+    private int regiaoPousoY;
     private String nomeSonda;
     private String nomePlaneta;
+    private char direcao;
 }

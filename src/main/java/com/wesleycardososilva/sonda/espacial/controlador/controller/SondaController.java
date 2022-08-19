@@ -25,13 +25,19 @@ public class SondaController {
 
         return sondaService.saveSonda(sonda);
     }
-//    @PostMapping("/pouso")
-//    public ResponseBody pousaSonda(@RequestBody PousoDTO pousoDTO) {
-//
-//        return sondaService.pousaSonda(pousoDTO);
-//    }
+    @PostMapping("/pouso")
+    public Sonda pousaSonda(@RequestBody PousoDTO pousoDTO) {
+
+        return sondaService.pousaSonda(pousoDTO);
+    }
     @PostMapping(value="/move")
     public Sonda movimentaSonda(@RequestBody ComandoDTO comandoDTO) {
+
         return sondaService.movimentaSonda(comandoDTO);
     }
+
+//    @GetMapping("name/{name}")
+//        public Sonda fetchSondaByName(@PathVariable("name") String nomeSonda){
+//        return sondaService.fetchSondaByName(nomeSonda);
+//    }
 }

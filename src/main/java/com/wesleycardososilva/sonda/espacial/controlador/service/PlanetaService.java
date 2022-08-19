@@ -8,4 +8,6 @@ import org.springframework.stereotype.Service;
 @Service
 public interface PlanetaService {
     public Planeta savePlaneta(Planeta planeta);
+    public Planeta findByNome(String nome);
+    public void saveOrUpdate(Planeta planeta, Long id);
 }

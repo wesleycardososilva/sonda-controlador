@@ -25,6 +25,7 @@ public class Regiao {
             generator = "regiao_sequence"
     )
     private Long regiaoID;
-    private int posicao;
+    private int posicaoX;
+    private int posicaoY;
     private String nomePlaneta;
 }
