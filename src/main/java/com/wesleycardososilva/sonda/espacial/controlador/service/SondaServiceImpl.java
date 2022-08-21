@@ -2,6 +2,7 @@ package com.wesleycardososilva.sonda.espacial.controlador.service;
 
 import com.wesleycardososilva.sonda.espacial.controlador.dto.ComandoDTO;
 import com.wesleycardososilva.sonda.espacial.controlador.dto.PousoDTO;
+import com.wesleycardososilva.sonda.espacial.controlador.entity.Planeta;
 import com.wesleycardososilva.sonda.espacial.controlador.entity.Regiao;
 import com.wesleycardososilva.sonda.espacial.controlador.entity.Sonda;
 import com.wesleycardososilva.sonda.espacial.controlador.repository.PlanetaRepository;
@@ -32,6 +33,9 @@ public class SondaServiceImpl implements SondaService{
 
     @Override
     public Sonda pousaSonda(PousoDTO pousoDTO) {
+        Planeta planeta = new Planeta();
+        planeta = planetaRepository.findByNome(pousoDTO.getNomePlaneta());
+        checkArea(pousoDTO, planeta);
         List<Regiao> regioes =  regiaoRepository.findByNomePlaneta(pousoDTO.getNomePlaneta());
         Optional<Regiao> regiao =  regioes.stream().filter(o -> o.getNomePlaneta().equals(pousoDTO.getNomePlaneta())).findFirst();
 
@@ -41,36 +45,41 @@ public class SondaServiceImpl implements SondaService{
             sonda.setPosicaoPousoY(pousoDTO.getRegiaoPousoY());
             sonda.setDirecao(pousoDTO.getDirecao());
             sonda.setName(pousoDTO.getNomeSonda());
+            planeta.getSondas().add(sonda);
             Regiao quadrante = new Regiao();
+
             quadrante.setNomePlaneta(pousoDTO.getNomePlaneta());
             quadrante.setPosicaoX(pousoDTO.getRegiaoPousoX());
             quadrante.setPosicaoY(pousoDTO.getRegiaoPousoY());
-            regiaoRepository.save(quadrante);
-            return sondaRepository.save(sonda);
+            planeta.getRegioes().add(quadrante);
+
+//            regiaoRepository.save(quadrante);
+             sonda = sondaRepository.save(sonda);
+             planetaRepository.save(planeta);
+             return sonda;
+        } else if (isPresent(regioes,pousoDTO.getRegiaoPousoX(), pousoDTO.getRegiaoPousoX())) {
+            return null;
         }
 
         return pousaSonda(pousoDTO);
     }
     @Override
     public Sonda movimentaSonda(ComandoDTO comandoDTO){
-
-
         List<Regiao> regioes =  regiaoRepository.findByNomePlaneta(comandoDTO.getNomePlaneta());
         Optional<Regiao> regiao =  regioes.stream().filter(o -> o.getNomePlaneta().equals(comandoDTO.getNomePlaneta())).findFirst();
-
         Sonda sonda = new Sonda();
+        
         sonda = sondaRepository.findByName(comandoDTO.getNomeSonda());
         sonda.setPosicaoX(sonda.getPosicaoPousoX());
         sonda.setPosicaoY(sonda.getPosicaoPousoY());
-
         sonda = calculaMovimento(sonda, comandoDTO);
-        if(!dentroDoPlaneta(sonda)){
+        
+        if(foraDoPlaneta(sonda)){
             sonda.setPosicaoX(sonda.getPosicaoPousoX());
             sonda.setPosicaoY(sonda.getPosicaoPousoY());
             return null;
         }
-
-        if(!isPresent(regioes,sonda.getPosicaoX(), sonda.getPosicaoY())){
+        if(!isPresent(regioes,sonda.getPosicaoX(), sonda.getPosicaoY()) ){
         sonda.setPosicaoPousoX(sonda.getPosicaoX());
         sonda.setPosicaoPousoY(sonda.getPosicaoY());
         Regiao quadrante = new Regiao();
@@ -103,12 +112,12 @@ public class SondaServiceImpl implements SondaService{
             return true;
         }else return false;
     }
-    public boolean dentroDoPlaneta(Sonda sonda){
-        if(sonda.getPosicaoX() > 5 && sonda.getPosicaoY() > 5){
-            return false;
-        } else if (sonda.getPosicaoX() < 0 && sonda.getPosicaoY() < 0) {
-            return false;
-        }else return true;
+    public boolean foraDoPlaneta(Sonda sonda){
+        if(sonda.getPosicaoX() > 5 || sonda.getPosicaoY() > 5){
+            return true;
+        } else if (sonda.getPosicaoX() < 0 || sonda.getPosicaoY() < 0) {
+            return true;
+        }else return false;
     }
 
 
@@ -184,6 +193,15 @@ public class SondaServiceImpl implements SondaService{
             movimenta(ch, sonda);
         }
         return sonda;
+    }
+    public boolean checkArea(PousoDTO pousoDTO, Planeta planeta){
+        if(pousoDTO.getRegiaoPousoX() < 0 || pousoDTO.getRegiaoPousoY() < 0 ){
+            throw new IllegalArgumentException("Coordenada fora dos limites da regiao de pouso");
+        }
+        if(pousoDTO.getRegiaoPousoX() > planeta.getDimensaoX() || pousoDTO.getRegiaoPousoY() > planeta.getDimensaoY() ){
+            throw new IllegalArgumentException("Coordenada fora dos limites da regiao de pouso");
+        }
+        return true;
     }
 
 }

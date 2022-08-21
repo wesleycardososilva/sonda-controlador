@@ -11,8 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 
-//@SpringBootApplication
-//@ComponentScan(basePackageClasses = SondaController.class)
 @RestController
 @RequestMapping(value="api/sondas")
 public class SondaController {
