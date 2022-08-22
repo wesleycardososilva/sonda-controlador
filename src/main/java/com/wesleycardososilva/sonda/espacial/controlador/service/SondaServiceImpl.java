@@ -183,7 +183,7 @@ public class SondaServiceImpl implements SondaService{
             case 'E':
                 sonda.setPosicaoX(sonda.getPosicaoX() + 1 );
                 break;
-            default: throw new RuntimeException("Movimento inválida");
+            default: throw new RuntimeException("Movimento inválido");
         }
     }
     public Sonda calculaMovimento(Sonda sonda, ComandoDTO comandoDTO){

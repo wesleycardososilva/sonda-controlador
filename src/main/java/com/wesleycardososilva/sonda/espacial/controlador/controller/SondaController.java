@@ -34,8 +34,8 @@ public class SondaController {
         return sondaService.movimentaSonda(comandoDTO);
     }
 
-//    @GetMapping("name/{name}")
-//        public Sonda fetchSondaByName(@PathVariable("name") String nomeSonda){
-//        return sondaService.fetchSondaByName(nomeSonda);
-//    }
+    @GetMapping("sonda/{name}")
+    public Sonda findByName(@PathVariable("name") String nomeSonda){
+        return sondaService.findByName(nomeSonda);
+    }
 }

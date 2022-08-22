@@ -96,6 +96,47 @@ public class SondaServiceImplTest {
         Assert.assertEquals(sondaResultado.getDirecao(),sondaRetorno.getDirecao() );
     }
     @Test
+    public void testaMovimentaSonda_ForaDaRegiao(){
+        Regiao regiaoUmDois = Regiao.builder()
+                .nomePlaneta("fff")
+                .posicaoX(1)
+                .posicaoY(2)
+                .build();
+        Regiao regiaoDoisTres = Regiao.builder()
+                .nomePlaneta("fff")
+                .posicaoX(2)
+                .posicaoY(3)
+                .build();
+        Planeta planeta =
+                Planeta.builder()
+                        .nome("fff")
+                        .dimensaoX(5)
+                        .dimensaoY(5)
+                        .regioes(List.of(regiaoUmDois,regiaoDoisTres))
+                        .build();
+        Sonda sonda = Sonda.builder()
+                .sondaId(123123L)
+                .comandos("MMRMMRMRRML")
+                .name("fff")
+                .posicaoX(5)
+                .posicaoY(1)
+                .posicaoPousoX(5)
+                .posicaoPousoY(1)
+                .direcao('N')
+                .build();
+        comandoDto.setNomeSonda("fff");
+        comandoDto.setComando("MMRMMRMRRML");
+        comandoDto.setNomePlaneta("fff");
+        Sonda sondaResultado = new Sonda();
+        Sonda sondaRetorno = new Sonda();
+        sondaResultado.setPosicaoY(1);
+        sondaResultado.setPosicaoX(5);
+        sondaResultado.setDirecao('N');
+        sondaRetorno= sondaServiceImpl.calculaMovimento(sonda, comandoDto);
+        boolean foraDoPlaneta = sondaServiceImpl.foraDoPlaneta(sondaRetorno);
+        Assert.assertEquals(foraDoPlaneta, true);
+    }
+    @Test
     public void testaPousoSonda(){
         Regiao regiaoUmDois = Regiao.builder()
                 .nomePlaneta("fff")
