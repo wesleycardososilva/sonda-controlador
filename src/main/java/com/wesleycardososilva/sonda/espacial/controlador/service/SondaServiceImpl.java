@@ -113,9 +113,9 @@ public class SondaServiceImpl implements SondaService{
         }else return false;
     }
     public boolean foraDoPlaneta(Sonda sonda){
-        if(sonda.getPosicaoX() > 5 || sonda.getPosicaoY() > 5){
+        if(sonda.getPosicaoX() < (-5) || sonda.getPosicaoY() < (-5)){
             return true;
-        } else if (sonda.getPosicaoX() < 0 || sonda.getPosicaoY() < 0) {
+        } else if (sonda.getPosicaoX() > 5 || sonda.getPosicaoY() > 5) {
             return true;
         }else return false;
     }
@@ -195,7 +195,10 @@ public class SondaServiceImpl implements SondaService{
         return sonda;
     }
     public boolean checkArea(PousoDTO pousoDTO, Planeta planeta){
-        if(pousoDTO.getRegiaoPousoX() < 0 || pousoDTO.getRegiaoPousoY() < 0 ){
+        if(pousoDTO.getRegiaoPousoX() < (-5) || pousoDTO.getRegiaoPousoY() < (-5) ){
+            throw new IllegalArgumentException("Coordenada fora dos limites da regiao de pouso");
+        }
+        if(pousoDTO.getRegiaoPousoX() > 5 || pousoDTO.getRegiaoPousoY() >5 ){
             throw new IllegalArgumentException("Coordenada fora dos limites da regiao de pouso");
         }
         if(pousoDTO.getRegiaoPousoX() > planeta.getDimensaoX() || pousoDTO.getRegiaoPousoY() > planeta.getDimensaoY() ){
